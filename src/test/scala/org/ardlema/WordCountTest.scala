@@ -41,7 +41,7 @@ class WordCountTest
 
      Then("words counted after first slide")
      clock.advance(slideDuration.milliseconds)
-     eventually(timeout(4 seconds)) {
+     eventually(timeout(4.seconds)) {
        results.last should equal(Array(
          WordCount("a", 1),
          WordCount("b", 1)))
@@ -52,7 +52,7 @@ class WordCountTest
 
      Then("words counted after second slide")
      clock.advance(slideDuration.milliseconds)
-     eventually(timeout(4 seconds)) {
+     eventually(timeout(4.seconds)) {
        results.last should equal(Array(
          WordCount("a", 1),
          WordCount("b", 2),
@@ -63,7 +63,7 @@ class WordCountTest
 
      Then("word counted after third slide")
      clock.advance(slideDuration.milliseconds)
-     eventually(timeout(4 seconds)) {
+     eventually(timeout(4.seconds)) {
        results.last should equal(Array(
          WordCount("a", 0),
          WordCount("b", 1),
@@ -74,7 +74,7 @@ class WordCountTest
 
      Then("word counted after fourth slide")
      clock.advance(slideDuration.milliseconds)
-     eventually(timeout(4 seconds)) {
+     eventually(timeout(4.seconds)) {
        results.last should equal(Array(
          WordCount("a", 0),
          WordCount("b", 0),
