@@ -1,6 +1,5 @@
 package org.ardlema
 
-import org.apache.spark.SparkContext._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming.StreamingContext._
 import org.apache.spark.streaming._
@@ -10,20 +9,6 @@ case class WordCount(word: String, count: Int)
 
 object WordCount {
   type WordHandler = (RDD[WordCount], Time) => Unit
-
-  def count(lines: RDD[String]): RDD[WordCount] = count(lines, Set())
-
-  def count(lines: RDD[String], stopWords: Set[String]): RDD[WordCount] = {
-    val words = prepareWords(lines, stopWords)
-
-    val wordCounts = words.map(word => (word, 1)).reduceByKey(_ + _).map {
-      case (word: String, count: Int) => WordCount(word, count)
-    }
-
-    val sortedWordCounts = wordCounts.sortBy(_.word)
-
-    sortedWordCounts
-  }
 
   def count(lines: DStream[String],
             windowDuration: Duration,

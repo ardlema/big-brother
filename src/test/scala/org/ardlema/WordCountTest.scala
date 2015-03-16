@@ -1,9 +1,11 @@
 package org.ardlema
 
+import java.nio.file.Files
 import scala.collection.mutable
 import scala.collection.mutable.ListBuffer
 import scala.concurrent.duration._
 
+import org.apache.spark.{SparkContext, SparkConf}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming._
 import org.scalatest._
@@ -11,18 +13,33 @@ import org.scalatest.concurrent.Eventually
 
 class WordCountTest
   extends FlatSpec
-  with StreamingContextHandler
   with GivenWhenThen
   with Eventually
-  with Matchers {
+  with Matchers
+  with BeforeAndAfter {
 
   val windowDuration = Seconds(4)
   val slideDuration = Seconds(2)
+  val master = "local[2]"
+  val appName = "example-spark-streaming"
+  val batchDuration = Seconds(1)
+  val checkpointDir = Files.createTempDirectory(appName).toString
+  val conf = new SparkConf()
+    .setMaster(master)
+    .setAppName(appName)
+    .set("spark.streaming.clock", "org.apache.spark.streaming.util.ManualClock")
+  val sc = new SparkContext(conf)
+  val ssc = new StreamingContext(sc, batchDuration)
+  ssc.checkpoint(checkpointDir)
+
+  after {
+    if (sc != null) sc.stop()
+    if (ssc != null) ssc.stop(stopSparkContext = false, stopGracefully = false)
+  }
 
   behavior of "WordCounter"
 
   "Sample set" should "be counted" in {
-   withStreamingAndSparkContext { (ssc, sc) =>
      val clock = new ClockWrapper(ssc)
 
      Given("streaming context is initialized")
@@ -81,5 +98,4 @@ class WordCountTest
          WordCount("c", 0)))
      }
    }
-  }
 }
