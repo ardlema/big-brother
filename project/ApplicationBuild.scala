@@ -9,7 +9,7 @@ object ApplicationBuild extends Build {
   import scoverage.ScoverageSbtPlugin.{buildSettings => scoverageSettings}
 
   object Versions {
-    val spark = "1.2.1"
+    val spark = "1.3.0"
   }
 
   val customScalacOptions = Seq(
