@@ -25,8 +25,7 @@ object ApplicationBuild extends Build {
     "-Xlint",
     "-Yno-adapted-args",
     "-Ywarn-dead-code",
-    "-Ywarn-numeric-widen",
-    "-Ywarn-unused-import")
+    "-Ywarn-numeric-widen")
 
   val customJavaInRuntimeOptions = Seq(
     "-Xmx512m"
@@ -46,13 +45,11 @@ object ApplicationBuild extends Build {
   val customLibraryDependencies = Seq(
     "org.apache.spark" %% "spark-core" % Versions.spark,
     "org.apache.spark" %% "spark-streaming" % Versions.spark,
-
+    "org.apache.spark" % "spark-streaming-kafka_2.10" % "1.3.0",
+    "org.apache.curator" % "curator-test" % "2.7.1",
     "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
-
     "org.slf4j" % "slf4j-api" % "1.7.10",
     "ch.qos.logback" % "logback-classic" % "1.1.2",
-    "org.apache.kafka" % "kafka_2.10" % "0.8.2.0",
-
     "org.scalatest" %% "scalatest" % "2.2.4" % "test"
   ).map(_.exclude(
     "org.slf4j", "slf4j-log4j12"
@@ -63,7 +60,7 @@ object ApplicationBuild extends Build {
     base = file("."),
     settings = Seq(
       version := "1.0",
-      scalaVersion := "2.11.4",
+      scalaVersion := "2.10.4",
       javaOptions in Runtime ++= customJavaInRuntimeOptions,
       javaOptions in Test ++= customJavaInTestOptions,
       scalacOptions ++= customScalacOptions,
