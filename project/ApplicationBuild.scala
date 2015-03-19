@@ -9,7 +9,7 @@ object ApplicationBuild extends Build {
   import scoverage.ScoverageSbtPlugin.{buildSettings => scoverageSettings}
 
   object Versions {
-    val spark = "1.2.1"
+    val spark = "1.3.0"
   }
 
   val customScalacOptions = Seq(
@@ -47,7 +47,6 @@ object ApplicationBuild extends Build {
     "org.apache.spark" %% "spark-streaming" % Versions.spark,
     "org.apache.spark" % "spark-streaming-kafka_2.10" % "1.3.0",
     "org.apache.curator" % "curator-test" % "2.7.1",
-    "com.typesafe.scala-logging" %% "scala-logging" % "3.1.0",
     "org.slf4j" % "slf4j-api" % "1.7.10",
     "ch.qos.logback" % "logback-classic" % "1.1.2",
     "org.scalatest" %% "scalatest" % "2.2.4" % "test"
