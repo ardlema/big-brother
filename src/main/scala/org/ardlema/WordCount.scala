@@ -39,7 +39,6 @@ object WordCount {
             windowDuration: Duration,
             slideDuration: Duration)
            (handler: WordHandler): Unit = {
-
     val wordCounts = messages.map(x => (x._2, 1)).reduceByKeyAndWindow(_ + _, _ - _, windowDuration, slideDuration).map {
       case (word: String, count: Int) => WordCount(word, count)
     }

@@ -54,13 +54,16 @@ class DirectKakfaWordCountTest
     withKakfaProducer { kafkaProducer =>
       val clock = new ClockWrapper(ssc)
 
-      Given("streaming context is initialized")
       val topic = "testTopic"
-      val topics = Set("testTopic", "anothertopic")
-      //val topicsSet = Array(topic).toSet
+      val dummyMessage = new KeyedMessage[String, String](topic, "dummyMessage")
+      kafkaProducer.send(dummyMessage)
+
+      Given("streaming context is initialized and we have at least one message in the kafka topic")
+      val topics = Set(topic)
       val messages: InputDStream[(String, String)] = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
         ssc, kafkaParams, topics)
 
+      //TODO: Try to get rid of this mutable variable
       var results = ListBuffer.empty[Array[WordCount]]
 
       WordCount.countKafka(messages, windowDuration, slideDuration) { (wordsCount: RDD[WordCount], time: Time) =>
@@ -70,28 +73,34 @@ class DirectKakfaWordCountTest
       ssc.start()
 
       When("first set of words queued")
-      //lines += sc.makeRDD(Seq("a", "b"))
-      kafkaProducer.send(new KeyedMessage[String, Message](topic, new Message("a".getBytes)))
-      kafkaProducer.send(new KeyedMessage[String, Message](topic, new Message("b".getBytes)))
+      val messageAmparo = new KeyedMessage[String, String](topic, "amparo")
+      val messageManuela = new KeyedMessage[String, String](topic, "manuela")
+      kafkaProducer.send(messageAmparo)
+      kafkaProducer.send(messageManuela)
+
 
       Then("words counted after first slide")
       clock.advance(slideDuration.milliseconds)
       eventually(timeout(4.seconds)) {
-        results.last should equal(Array(
-          WordCount("a", 1),
-          WordCount("b", 1)))
+        results.last should contain theSameElementsAs(
+          Array(
+            WordCount("amparo", 1),
+            WordCount("manuela", 1)))
       }
 
-      /*When("second set of words queued")
-      lines += sc.makeRDD(Seq("b", "c"))
+      When("second set of words queued")
+      val messageAntonia = new KeyedMessage[String, String](topic, "antonia")
+      kafkaProducer.send(messageManuela)
+      kafkaProducer.send(messageAntonia)
 
       Then("words counted after second slide")
       clock.advance(slideDuration.milliseconds)
       eventually(timeout(4.seconds)) {
-        results.last should equal(Array(
-          WordCount("a", 1),
-          WordCount("b", 2),
-          WordCount("c", 1)))
+        results.last should contain theSameElementsAs(
+          Array(
+            WordCount("amparo", 1),
+            WordCount("manuela", 2),
+            WordCount("antonia", 1)))
       }
 
       When("nothing more queued")
@@ -99,10 +108,11 @@ class DirectKakfaWordCountTest
       Then("word counted after third slide")
       clock.advance(slideDuration.milliseconds)
       eventually(timeout(4.seconds)) {
-        results.last should equal(Array(
-          WordCount("a", 0),
-          WordCount("b", 1),
-          WordCount("c", 1)))
+        results.last should contain theSameElementsAs(
+          Array(
+            WordCount("amparo", 0),
+            WordCount("manuela", 1),
+            WordCount("antonia", 1)))
       }
 
       When("nothing more queued")
@@ -110,11 +120,12 @@ class DirectKakfaWordCountTest
       Then("word counted after fourth slide")
       clock.advance(slideDuration.milliseconds)
       eventually(timeout(4.seconds)) {
-        results.last should equal(Array(
-          WordCount("a", 0),
-          WordCount("b", 0),
-          WordCount("c", 0)))
-      }*/
+        results.last should contain theSameElementsAs(
+          Array(
+            WordCount("amparo", 0),
+            WordCount("manuela", 0),
+            WordCount("antonia", 0)))
+      }
     }
   }
 }

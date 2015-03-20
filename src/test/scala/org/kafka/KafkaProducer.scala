@@ -29,13 +29,14 @@ trait KafkaProducer {
   val propsProd = new Properties()
   propsProd.put("metadata.broker.list", "localhost:9092")
   propsProd.put("request.required.acks", "1")
+  propsProd.put("serializer.class","kafka.serializer.StringEncoder")
 
   val config = new ProducerConfig(props)
   val producer = new Producer[String, String](config)
 
-  def withKakfaProducer(p: Producer[String, Message] => Any) =  {
+  def withKakfaProducer(p: Producer[String, String] => Any) =  {
     val prodConfig = new ProducerConfig(propsProd)
-    val producer = (new Producer[String, Message](prodConfig))
+    val producer = (new Producer[String, String](prodConfig))
     p(producer)
     producer.close
     server.shutdown()

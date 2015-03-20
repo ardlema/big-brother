@@ -45,6 +45,7 @@ class WordCountTest
      Given("streaming context is initialized")
      val lines = mutable.Queue[RDD[String]]()
 
+    //TODO: Try to get rid of this mutable variable
      var results = ListBuffer.empty[Array[WordCount]]
 
      WordCount.count(ssc.queueStream(lines), windowDuration, slideDuration) { (wordsCount: RDD[WordCount], time: Time) =>
