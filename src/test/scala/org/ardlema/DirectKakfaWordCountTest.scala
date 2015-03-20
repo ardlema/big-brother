@@ -66,7 +66,7 @@ class DirectKakfaWordCountTest
       //TODO: Try to get rid of this mutable variable
       var results = ListBuffer.empty[Array[WordCount]]
 
-      WordCount.countKafka(messages, windowDuration, slideDuration) { (wordsCount: RDD[WordCount], time: Time) =>
+      WordCount.countKafkaMessages(messages, windowDuration, slideDuration) { (wordsCount: RDD[WordCount], time: Time) =>
         results += wordsCount.collect()
       }
 
