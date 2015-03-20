@@ -51,7 +51,7 @@ class DirectKakfaWordCountTest
   behavior of "WordCounter"
 
   "Sample set" should "be counted" in {
-    withKakfaProducer { kafkaProducer =>
+    withKafkaProducer { kafkaProducer =>
       val clock = new ClockWrapper(ssc)
 
       val topic = "testTopic"
@@ -64,9 +64,9 @@ class DirectKakfaWordCountTest
         ssc, kafkaParams, topics)
 
       //TODO: Try to get rid of this mutable variable
-      var results = ListBuffer.empty[Array[WordCount]]
+      var results = ListBuffer.empty[Array[DirectKakfaWordCount]]
 
-      WordCount.countKafkaMessages(messages, windowDuration, slideDuration) { (wordsCount: RDD[WordCount], time: Time) =>
+      DirectKakfaWordCount.countKafkaMessages(messages, windowDuration, slideDuration) { (wordsCount: RDD[DirectKakfaWordCount], time: Time) =>
         results += wordsCount.collect()
       }
 
@@ -84,8 +84,8 @@ class DirectKakfaWordCountTest
       eventually(timeout(4.seconds)) {
         results.last should contain theSameElementsAs(
           Array(
-            WordCount("amparo", 1),
-            WordCount("manuela", 1)))
+            DirectKakfaWordCount("amparo", 1),
+            DirectKakfaWordCount("manuela", 1)))
       }
 
       When("second set of words queued")
@@ -98,9 +98,9 @@ class DirectKakfaWordCountTest
       eventually(timeout(4.seconds)) {
         results.last should contain theSameElementsAs(
           Array(
-            WordCount("amparo", 1),
-            WordCount("manuela", 2),
-            WordCount("antonia", 1)))
+            DirectKakfaWordCount("amparo", 1),
+            DirectKakfaWordCount("manuela", 2),
+            DirectKakfaWordCount("antonia", 1)))
       }
 
       When("nothing more queued")
@@ -110,9 +110,9 @@ class DirectKakfaWordCountTest
       eventually(timeout(4.seconds)) {
         results.last should contain theSameElementsAs(
           Array(
-            WordCount("amparo", 0),
-            WordCount("manuela", 1),
-            WordCount("antonia", 1)))
+            DirectKakfaWordCount("amparo", 0),
+            DirectKakfaWordCount("manuela", 1),
+            DirectKakfaWordCount("antonia", 1)))
       }
 
       When("nothing more queued")
@@ -122,9 +122,9 @@ class DirectKakfaWordCountTest
       eventually(timeout(4.seconds)) {
         results.last should contain theSameElementsAs(
           Array(
-            WordCount("amparo", 0),
-            WordCount("manuela", 0),
-            WordCount("antonia", 0)))
+            DirectKakfaWordCount("amparo", 0),
+            DirectKakfaWordCount("manuela", 0),
+            DirectKakfaWordCount("antonia", 0)))
       }
     }
   }
