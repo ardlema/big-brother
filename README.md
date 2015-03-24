@@ -9,9 +9,14 @@ Features
 
 TODO:
 
-  * Read users events from Kafka topics
-  * Identify when users spend enough time in one place to identify this place as a dwell
+  * Parse user events. The user events will have the following format:
+     userId,location
+    Where location will be a WKT polygon like this: POLYGON((-3.9968132972717285 40.63518634434282,-3.9978432655334473 40.63451871274505,-3.9962339401245117 40.63422560408105,-3.9968132972717285 40.63518634434282))
+
+  * Identify user dwells. To identify a dwell we should get events with intersected locations during a defined period. The dwell will be the intersection of all these events location
+
   * Write this dwells to an output file (format??)
+
   * Visualize the dwells
 
 References
