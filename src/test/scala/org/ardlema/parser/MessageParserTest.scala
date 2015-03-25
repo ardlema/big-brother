@@ -36,7 +36,7 @@ class MessageParserTest extends FlatSpec with GivenWhenThen with Eventually with
       "-3.9968132972717285 40.63518634434282))"
     val parsedMessage = MessageParser.parse(wrongIdMessage)
 
-    parsedMessage.fold(e => e.errorMessage should be (WrongUserIdMessage), r => fail)
+    parsedMessage.fold(e => e.errorMessage should be (WrongFieldFormatMessage), r => fail)
     //TODO: Parse the location
     //parsedMessage.location should be()
   }
