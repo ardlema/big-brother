@@ -7,11 +7,17 @@ Spark streaming project to detect user activity depending on the events generate
 Features
 ========
 
-TODO:
+DONE:
+
+  * Integrate kafka with Spark Streaming using the Spark 1.3 direct approach (see: [Spark Streaming 1.3.0 - Kafka integration](http://spark.apache.org/docs/1.3.0/streaming-kafka-integration.html))
 
   * Parse user events. The user events will have the following format:
      userId,location
     Where location will be a WKT polygon like this: POLYGON((-3.9968132972717285 40.63518634434282,-3.9978432655334473 40.63451871274505,-3.9962339401245117 40.63422560408105,-3.9968132972717285 40.63518634434282))
+
+
+TODO:
+
 
   * Identify user dwells. To identify a dwell we should get events with intersected locations during a defined period. The dwell will be the intersection of all these events location
 
