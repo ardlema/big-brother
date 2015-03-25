@@ -1,8 +1,8 @@
-package org.ardlema
+package org.ardlema.spark
 
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming._
-import org.apache.spark.streaming.dstream.{InputDStream, DStream}
+import org.apache.spark.streaming.dstream.InputDStream
 
 case class DirectKakfaWordCount(word: String, count: Int)
 

@@ -1,18 +1,19 @@
-package org.ardlema
+package org.ardlema.spark
 
 import java.nio.file.Files
-import scala.collection.mutable.ListBuffer
-import scala.concurrent.duration._
 
 import _root_.kafka.producer.KeyedMessage
 import kafka.serializer.StringDecoder
-import org.apache.spark.{SparkConf, SparkContext}
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka.KafkaUtils
+import org.apache.spark.{SparkConf, SparkContext}
 import org.kafka.KafkaProducer
 import org.scalatest._
 import org.scalatest.concurrent.Eventually
+
+import scala.collection.mutable.ListBuffer
+import scala.concurrent.duration._
 
 class DirectKakfaWordCountTest
   extends FlatSpec
