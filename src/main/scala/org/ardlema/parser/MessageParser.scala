@@ -4,21 +4,34 @@ import com.vividsolutions.jts.geom.Geometry
 import com.vividsolutions.jts.io.WKTReader
 
 import scala.util.{Try, Success, Failure}
+import scalaz.{-\/, \/-, \/}
 
 case class Message(userId: Long, geometry: Geometry)
 case class ParseError(errorMessage: ParserErrorMessages)
 
+object GeomUtils {
+  val SRID = 4326
+
+  def parseGeometry(geomWkt: String) = {
+    val reader = new WKTReader
+    Try {
+      val geom = reader.read(geomWkt)
+      geom.setSRID(SRID)
+      geom
+    }
+  }
+}
+
 object MessageParser {
   //TODO: Extract to a properties file, would it make sense though?
   val separator = '|'
-  val SRID = 4326
 
-  def parse(message: String): Either[ParseError, Message] = {
+  def parse(message: String): \/[ParseError, Message] = {
     val fields = message.split(separator)
-    if (emptyFields(fields)) Left(ParseError(EmptyMessage))
+    if (emptyFields(fields)) -\/(ParseError(EmptyMessage))
     else parseFields(fields) match {
-      case Success(message) => Right(message)
-      case Failure(ex) => Left(ParseError(WrongFieldFormatMessage))
+      case Success(message) => \/-(message)
+      case Failure(ex) => -\/(ParseError(WrongFieldFormatMessage))
     }
   }
 
@@ -27,18 +40,9 @@ object MessageParser {
   private def parseFields(fields: Array[String]) = {
     for {
       userId <- parseUserId(fields(0))
-      geom <- parseGeometry(fields(1))
+      geom <- GeomUtils.parseGeometry(fields(1))
     } yield Message(userId, geom)
   }
 
   private def parseUserId(userId: String) = Try(userId.toLong)
-
-  private def parseGeometry(geomWkt: String) = {
-    val reader = new WKTReader
-    Try {
-      val geom = reader.read(geomWkt)
-      geom.setSRID(SRID)
-      geom
-    }
-  }
 }

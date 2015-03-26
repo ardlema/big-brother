@@ -14,11 +14,10 @@ class MessageParserTest extends FlatSpec with GivenWhenThen with Eventually with
       "-3.9968132972717285 40.63518634434282))"
     val parsedMessage = MessageParser.parse(message)
 
-    parsedMessage.fold(e => fail, {
-      r =>
-        r.userId should equal(1234)
-        r.geometry.getNumPoints should equal(4)
-        val Array(coord1, coord2, coord3, coord4) = r.geometry.getCoordinates
+    parsedMessage.map(message => {
+        message.userId should equal(1234)
+        message.geometry.getNumPoints should equal(4)
+        val Array(coord1, coord2, coord3, coord4) = message.geometry.getCoordinates
         coord1.x should equal(-3.9968132972717285)
         coord1.y should equal(40.63518634434282)
         coord2.x should equal(-3.9978432655334473)
@@ -34,7 +33,7 @@ class MessageParserTest extends FlatSpec with GivenWhenThen with Eventually with
     val emptyMessage = ""
     val parsedMessage = MessageParser.parse(emptyMessage)
 
-    parsedMessage.fold(e => e.errorMessage should be (EmptyMessage), r => fail)
+    parsedMessage.swap.map(e => e.errorMessage should be (EmptyMessage))
   }
 
   "A message" should "not be parsed when the user id has wrong type" in {
@@ -45,13 +44,13 @@ class MessageParserTest extends FlatSpec with GivenWhenThen with Eventually with
       "-3.9968132972717285 40.63518634434282))"
     val parsedMessage = MessageParser.parse(wrongIdMessage)
 
-    parsedMessage.fold(e => e.errorMessage should be (WrongFieldFormatMessage), r => fail)
+    parsedMessage.swap.map(e => e.errorMessage should be (WrongFieldFormatMessage))
   }
 
   "A message" should "not be parsed when the it has a wrong location" in {
     val wrongIdMessage = "hello|wrongLocation"
     val parsedMessage = MessageParser.parse(wrongIdMessage)
 
-    parsedMessage.fold(e => e.errorMessage should be (WrongFieldFormatMessage), r => fail)
+    parsedMessage.swap.map(e => e.errorMessage should be (WrongFieldFormatMessage))
   }
 }
