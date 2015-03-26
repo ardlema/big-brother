@@ -15,27 +15,14 @@
 // limitations under the License.
 package org.ardlema.parser
 
-import com.vividsolutions.jts.geom.Geometry
-import com.vividsolutions.jts.io.WKTReader
-
 import scala.util.{Try, Success, Failure}
 import scalaz.{-\/, \/-, \/}
 
+import com.vividsolutions.jts.geom.Geometry
+import org.ardlema.geometry.GeomUtils
+
 case class Message(userId: Long, geometry: Geometry)
 case class ParseError(errorMessage: ParserErrorMessages)
-
-object GeomUtils {
-  val SRID = 4326
-
-  def parseGeometry(geomWkt: String): Try[Geometry] = {
-    val reader = new WKTReader
-    Try {
-      val geom = reader.read(geomWkt)
-      geom.setSRID(SRID)
-      geom
-    }
-  }
-}
 
 object MessageParser {
   //TODO: Extract to a properties file, would it make sense though?
@@ -51,6 +38,8 @@ object MessageParser {
       }
     }
   }
+
+  def properMessage(message: String): Boolean = if (MessageParser.parse(message).isRight) true else false
 
   private def emptyFields(fields: Array[String]) = (fields.size == 1) && (fields(0).equals(""))
 

@@ -1,19 +1,18 @@
 package org.ardlema.parser
 
-import org.scalatest.concurrent.Eventually
 import org.scalatest.{ShouldMatchers, GivenWhenThen, FlatSpec}
 
-class MessageParserTest extends FlatSpec with GivenWhenThen with Eventually with ShouldMatchers {
+class MessageParserTest extends FlatSpec with GivenWhenThen with ShouldMatchers {
+  val properMessage = "1234|POLYGON(" +
+    "(-3.9968132972717285 40.63518634434282," +
+    "-3.9978432655334473 40.63451871274505," +
+    "-3.9962339401245117 40.63422560408105," +
+    "-3.9968132972717285 40.63518634434282))"
+
 
   behavior of "MessageParser"
   "A message" should "be parsed" in {
-    val message = "1234|POLYGON(" +
-      "(-3.9968132972717285 40.63518634434282," +
-      "-3.9978432655334473 40.63451871274505," +
-      "-3.9962339401245117 40.63422560408105," +
-      "-3.9968132972717285 40.63518634434282))"
-    val parsedMessage = MessageParser.parse(message)
-
+    val parsedMessage = MessageParser.parse(properMessage)
     parsedMessage.map(message => {
         message.userId should equal(1234)
         message.geometry.getNumPoints should equal(4)
@@ -52,5 +51,15 @@ class MessageParserTest extends FlatSpec with GivenWhenThen with Eventually with
     val parsedMessage = MessageParser.parse(wrongIdMessage)
 
     parsedMessage.swap.map(e => e.errorMessage should be (WrongFieldFormatMessage))
+  }
+
+  "A right message" should "be identified as proper message" in {
+    MessageParser.properMessage(properMessage) should be (true)
+  }
+
+  "A wrong message" should "not be identified as proper message" in {
+    val wrongMessage = "hello|wrongLocation"
+
+    MessageParser.properMessage(wrongMessage) should be (false)
   }
 }

@@ -3,13 +3,12 @@ package org.ardlema.spark
 import java.nio.file.Files
 
 import _root_.kafka.producer.KeyedMessage
-import com.vividsolutions.jts.geom.Geometry
 import kafka.serializer.StringDecoder
 import org.apache.spark.rdd.RDD
 import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.{SparkConf, SparkContext}
-import org.ardlema.parser.GeomUtils
+import org.ardlema.geometry.GeomUtils
 import org.kafka.KafkaProducer
 import org.scalatest._
 import org.scalatest.concurrent.Eventually
@@ -25,10 +24,11 @@ class DwellDetectorTest
   with BeforeAndAfter
   with KafkaProducer {
 
-/*  val appName = "kafka-word-count-app"
+  val appName = "kafka-word-count-app"
   val windowDuration = Seconds(4)
   val slideDuration = Seconds(2)
   val batchDuration = Seconds(1)
+  val dwellsThreshold = 1
   val sparkContext = createSparkContext
   val sparkStreamingContext = createSparkStreamingContext
   val checkpointDir = Files.createTempDirectory(appName).toString
@@ -49,8 +49,8 @@ class DwellDetectorTest
       val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
         sparkStreamingContext, kafkaParams, topics)
       //TODO: Try to get rid of this mutable variable!!
-      var results = ListBuffer.empty[Array[DirectKakfaWordCount]]
-      DwellDetector.detectDwells(messages, windowDuration, slideDuration) {
+      var results = ListBuffer.empty[Array[Dwell]]
+      DwellDetector.detectDwells(messages, windowDuration, slideDuration, dwellsThreshold) {
         (dwell: RDD[Dwell], time: Time) =>
           results += dwell.collect()
       }
@@ -78,10 +78,14 @@ class DwellDetectorTest
       Then("words counted after first slide")
       clock.advance(slideDuration.milliseconds)
       eventually(timeout(4.seconds)) {
-        results.last should contain theSameElementsAs(Array(Dwell("1234", houseDwellGeom)))
+        results.last should contain theSameElementsAs (Array(Dwell(1234, houseDwellGeom)))
       }
+    }
+  }
 
-      When("second set of words sent to the broker")
+
+
+      /*When("second set of words sent to the broker")
       val messageAntonia = new KeyedMessage[String, String](topic, "antonia")
       kafkaProducer.send(messageManuela)
       kafkaProducer.send(messageAntonia)
@@ -119,8 +123,7 @@ class DwellDetectorTest
             DirectKakfaWordCount("manuela", 0),
             DirectKakfaWordCount("antonia", 0)))
       }
-    }
-  }
+    }*/
 
   def createSparkContext = {
     val master = "local[2]"
@@ -136,5 +139,5 @@ class DwellDetectorTest
   after {
     if (sparkContext != null) sparkContext.stop()
     if (sparkStreamingContext != null) sparkStreamingContext.stop(stopSparkContext = false, stopGracefully = false)
-  }*/
+  }
 }
