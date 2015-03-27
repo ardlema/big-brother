@@ -33,19 +33,20 @@ class DwellDetectorTest
   val sparkStreamingContext = createSparkStreamingContext
   val checkpointDir = Files.createTempDirectory(appName).toString
   sparkStreamingContext.checkpoint(checkpointDir)
+  val brokerPort = 9093
 
   behavior of "DwellDetector"
   "A user daily activity" should "produced dwells" in {
-    withKafkaProducer { kafkaProducer =>
+    withKafkaProducer(zkPort = 2182, brokerPort = brokerPort, kafkaProducer => {
       val clock = new ClockWrapper(sparkStreamingContext)
-      val topic = "testTopic"
+      val topic = "dwellDetectorTopic"
       //We need to put a dummy message in the topic to avoid the "Couldn't find leader offsets for Set()" error
       val dummyMessage = new KeyedMessage[String, String](topic, "dummyMessage")
       kafkaProducer.send(dummyMessage)
 
       Given("streaming context is initialized and we have at least one message in the kafka topic")
       val topics = Set(topic)
-      val kafkaParams = Map[String, String]("metadata.broker.list" -> "localhost:9092")
+      val kafkaParams = Map[String, String]("metadata.broker.list" -> s"localhost:$brokerPort")
       val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
         sparkStreamingContext, kafkaParams, topics)
       //TODO: Try to get rid of this mutable variable!!
@@ -80,8 +81,8 @@ class DwellDetectorTest
       eventually(timeout(4.seconds)) {
         results.last should contain theSameElementsAs (Array(Dwell(1234, houseDwellGeom)))
       }
+    })
     }
-  }
 
 
 

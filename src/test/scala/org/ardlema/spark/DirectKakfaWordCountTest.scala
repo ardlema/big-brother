@@ -30,20 +30,21 @@ class DirectKakfaWordCountTest
   val sparkContext = createSparkContext
   val sparkStreamingContext = createSparkStreamingContext
   val checkpointDir = Files.createTempDirectory(appName).toString
+  val brokerPort = 9092
   sparkStreamingContext.checkpoint(checkpointDir)
 
   behavior of "WordCounter"
   "Sample set of messages" should "be counted" in {
-    withKafkaProducer { kafkaProducer =>
+    withKafkaProducer(zkPort = 2181, brokerPort = brokerPort, kafkaProducer => {
       val clock = new ClockWrapper(sparkStreamingContext)
-      val topic = "testTopic"
+      val topic = "kafkaCountTopic"
       //We need to put a dummy message in the topic to avoid the "Couldn't find leader offsets for Set()" error
       val dummyMessage = new KeyedMessage[String, String](topic, "dummyMessage")
       kafkaProducer.send(dummyMessage)
 
       Given("streaming context is initialized and we have at least one message in the kafka topic")
       val topics = Set(topic)
-      val kafkaParams = Map[String, String]("metadata.broker.list" -> "localhost:9092")
+      val kafkaParams = Map[String, String]("metadata.broker.list" -> s"localhost:$brokerPort")
       val messages = KafkaUtils.createDirectStream[String, String, StringDecoder, StringDecoder](
         sparkStreamingContext, kafkaParams, topics)
       //TODO: Try to get rid of this mutable variable!!
@@ -63,7 +64,7 @@ class DirectKakfaWordCountTest
       Then("words counted after first slide")
       clock.advance(slideDuration.milliseconds)
       eventually(timeout(4.seconds)) {
-        results.last should contain theSameElementsAs(
+        results.last should contain theSameElementsAs (
           Array(
             DirectKakfaWordCount("amparo", 1),
             DirectKakfaWordCount("manuela", 1)))
@@ -77,7 +78,7 @@ class DirectKakfaWordCountTest
       Then("words counted after second slide")
       clock.advance(slideDuration.milliseconds)
       eventually(timeout(4.seconds)) {
-        results.last should contain theSameElementsAs(
+        results.last should contain theSameElementsAs (
           Array(
             DirectKakfaWordCount("amparo", 1),
             DirectKakfaWordCount("manuela", 2),
@@ -89,7 +90,7 @@ class DirectKakfaWordCountTest
       Then("word counted after third slide")
       clock.advance(slideDuration.milliseconds)
       eventually(timeout(4.seconds)) {
-        results.last should contain theSameElementsAs(
+        results.last should contain theSameElementsAs (
           Array(
             DirectKakfaWordCount("amparo", 0),
             DirectKakfaWordCount("manuela", 1),
@@ -101,13 +102,13 @@ class DirectKakfaWordCountTest
       Then("word counted after fourth slide")
       clock.advance(slideDuration.milliseconds)
       eventually(timeout(4.seconds)) {
-        results.last should contain theSameElementsAs(
+        results.last should contain theSameElementsAs (
           Array(
             DirectKakfaWordCount("amparo", 0),
             DirectKakfaWordCount("manuela", 0),
             DirectKakfaWordCount("antonia", 0)))
       }
-    }
+    })
   }
 
   def createSparkContext = {
