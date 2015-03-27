@@ -9,6 +9,7 @@ import org.apache.spark.streaming._
 import org.apache.spark.streaming.kafka.KafkaUtils
 import org.apache.spark.{SparkConf, SparkContext}
 import org.ardlema.geometry.GeomUtils
+import org.ardlema.parser.MessageParser
 import org.kafka.KafkaProducer
 import org.scalatest._
 import org.scalatest.concurrent.Eventually
@@ -68,15 +69,15 @@ class DwellDetectorTest
         "-3.997328281402588 40.63396175429608," +
         "-3.9955687522888184 40.63402688992333," +
         "-3.9963412284851074 40.63498763304449))"
-      val colladoVillalbaLocation1Geom = GeomUtils.parseGeometry(colladoVillalbaLocation1).get
-      val colladoVillalbaLocation2Geom = GeomUtils.parseGeometry(colladoVillalbaLocation2).get
-      val houseDwellGeom = colladoVillalbaLocation1Geom.intersection(colladoVillalbaLocation2Geom)
-      val eventHouse1 = new KeyedMessage[String, String](topic, s"1234|$colladoVillalbaLocation1")
-      val eventHouse2 = new KeyedMessage[String, String](topic, s"1234|$colladoVillalbaLocation2")
+      val colladoVillalbaGeom1 = MessageParser.parse(colladoVillalbaLocation1).toOption.get.geometry
+      val colladoVillalbaGeom2 = MessageParser.parse(colladoVillalbaLocation2).toOption.get.geometry
+      val houseDwellGeom = colladoVillalbaGeom1.intersection(colladoVillalbaGeom2)
+      val eventHouse1 = new KeyedMessage[String, String](topic, colladoVillalbaLocation1)
+      val eventHouse2 = new KeyedMessage[String, String](topic, colladoVillalbaLocation2)
       kafkaProducer.send(eventHouse1)
       kafkaProducer.send(eventHouse2)
 
-      Then("words counted after first slide")
+      Then("Dwells detected after first slide")
       clock.advance(slideDuration.milliseconds)
       eventually(timeout(4.seconds)) {
         results.last should contain theSameElementsAs (Array(Dwell(1234, houseDwellGeom)))
