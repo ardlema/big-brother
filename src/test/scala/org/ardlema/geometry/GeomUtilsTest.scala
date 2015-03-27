@@ -1,5 +1,6 @@
 package org.ardlema.geometry
 
+import com.vividsolutions.jts.geom.GeometryFactory
 import org.scalatest._
 
 class GeomUtilsTest extends FlatSpec with GivenWhenThen with ShouldMatchers {
@@ -31,9 +32,18 @@ class GeomUtilsTest extends FlatSpec with GivenWhenThen with ShouldMatchers {
   val geom4 = GeomUtils.parseGeometry(notIntersectedGeom).toOption.get
   val intersectedGeomsList = List(geom1, geom2, geom3)
   val nonIntersectedGeomsList = List(geom1, geom2, geom4)
+  val emptyGeom = geom4.intersection(geom1)
 
   "The GeomUtils" should "return true when a list of geoms intersect to each other" in {
     GeomUtils.intersectAll(intersectedGeomsList) should be(true)
+  }
+
+  it should "return true for an empty geom" in {
+    GeomUtils.intersectAll(List()) should be(true)
+  }
+
+  it should "return true for a geom list with one element" in {
+    GeomUtils.intersectAll(List(geom1)) should be(true)
   }
 
   it should "return false when a geom within a list of geoms does not intersect to each other" in {
