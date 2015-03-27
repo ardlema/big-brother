@@ -15,11 +15,11 @@
 // limitations under the License.
 package org.ardlema.geometry
 
-import com.vividsolutions.jts.geom.Geometry
-import com.vividsolutions.jts.io.WKTReader
-
 import scala.annotation.tailrec
 import scala.util.Try
+
+import com.vividsolutions.jts.geom.Geometry
+import com.vividsolutions.jts.io.WKTReader
 
 object GeomUtils {
   val SRID = 4326
@@ -48,8 +48,8 @@ object GeomUtils {
       }
     }
 
-    if (geoms.isEmpty || geoms.size == 1) true
-    else intersect(geoms.tail, geoms.head)
+    if (geoms.isEmpty || geoms.size == 1) { true }
+    else { intersect(geoms.tail, geoms.head) }
   }
 
   def intersectGeoms(geoms: List[Geometry]): Geometry =
